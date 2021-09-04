@@ -25,15 +25,13 @@ public class FileService {
 	 */
 	public void processFileAndWriteAccountNumbers(String pathFileInputParam, String pathFileOutputParam) {
 		logger.info("Inicia la lectura del archivo...");
-		BufferedReader inputFile = null;
 		char[][] matrizTemp = new char[3][27];
 		int verticalCount = 0;
 		FileWriter outputFile = null;
 		PrintWriter pw = null;
-		try {
+		try (BufferedReader inputFile = new BufferedReader(new FileReader(pathFileInputParam))) {
 			outputFile = new FileWriter(pathFileOutputParam);
 			pw = new PrintWriter(outputFile);
-			inputFile = new BufferedReader(new FileReader(pathFileInputParam));
 
 			String lineAccountNumber = inputFile.readLine();
 
@@ -70,8 +68,6 @@ public class FileService {
 			try {
 				if (pw != null)
 					pw.close();
-				if (inputFile != null)
-					inputFile.close();
 				if (null != outputFile)
 					outputFile.close();
 			} catch (Exception e) {
