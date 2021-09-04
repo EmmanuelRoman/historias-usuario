@@ -1,8 +1,8 @@
 package main.model;
 
-public class Pattern {
+public class PatternModel {
 
-	public Pattern() {
+	public PatternModel() {
 		super();
 	}
 
