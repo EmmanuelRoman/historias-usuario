@@ -11,7 +11,6 @@ public class FileService {
 	static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FileService.class.getName());
 
 	PatternService patternService = new PatternService();
-
 	UtilService utilService = new UtilService();
 
 	/**
@@ -25,7 +24,7 @@ public class FileService {
 	 *                            que contiene los numeros de cuenta validados
 	 */
 	public void processFileAndWriteAccountNumbers(String pathFileInputParam, String pathFileOutputParam) {
-
+		logger.info("Inicia la lectura del archivo...");
 		BufferedReader inputFile = null;
 		char[][] matrizTemp = new char[3][27];
 		int verticalCount = 0;
@@ -51,6 +50,7 @@ public class FileService {
 					// procesamiento.
 					if (verticalCount == 3) {
 						String finaltAccountNumber = extractNumberData(matrizTemp);
+						logger.info(String.format("Se proceso el numero de cuenta: %s", finaltAccountNumber));
 						// Conforme se obtiene el dato final se escribe en el documento.
 						pw.println(finaltAccountNumber);
 					}
@@ -65,7 +65,11 @@ public class FileService {
 			logger.severe("Error de lectura del fichero");
 			logger.severe(e.getMessage());
 		} finally {
+
+			logger.info("Finalizo la lectura del archivo...");
 			try {
+				if (pw != null)
+					pw.close();
 				if (inputFile != null)
 					inputFile.close();
 				if (null != outputFile)
@@ -83,7 +87,7 @@ public class FileService {
 	 * obtenidos sean correctos.
 	 * 
 	 * @param matrizTemp contiene el numero de cuenta
-	 * @return
+	 * @return regresa el numero de cuenta ya validado y procesado.
 	 */
 	private String extractNumberData(char[][] matrizTemp) {
 		char[] vectorTemp = new char[9];
@@ -104,9 +108,43 @@ public class FileService {
 			countStepStep = (countStepStep + 3);
 		}
 
-		return null;
+		return scannValidData(vectorFinal);
 	}
 
+	/**
+	 * Metodo que procesa el vector final con los numeros ya identificados y
+	 * separados.
+	 * 
+	 * @param vectorFinal contiene el numero de cuenta.
+	 * @return regresa el numero de cuenta ya validado y procesado.
+	 */
+	private String scannValidData(char[] vectorFinal) {
+		int sumNumberDigit = 0;
+		boolean illegalCharacter = false;
+		int multi = 9;
+		for (int i = 0; i < vectorFinal.length; i++) {
+			if (utilService.isNumeric(String.valueOf(vectorFinal[i]))) {
+				int digit = Integer.parseInt(String.valueOf(vectorFinal[i]));
+				sumNumberDigit = (sumNumberDigit + (digit * multi));
+				multi--;
+			} else {
+				illegalCharacter = true;
+			}
+		}
 
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.valueOf(vectorFinal));
+		sb.append(" ");
+		if (illegalCharacter) {
+			sb.append("ILL");
+		} else {
+			if (sumNumberDigit % 11 == 0) {
+				sb.append("OK");
+			} else {
+				sb.append("ERR");
+			}
+		}
+		return sb.toString();
+	}
 
 }
