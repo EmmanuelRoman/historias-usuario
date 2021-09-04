@@ -27,7 +27,7 @@ public class FileService {
 	public void processFileAndWriteAccountNumbers(String pathFileInputParam, String pathFileOutputParam) {
 
 		BufferedReader inputFile = null;
-		char matrizTemp[][] = new char[3][27];
+		char[][] matrizTemp = new char[3][27];
 		int verticalCount = 0;
 		FileWriter outputFile = null;
 		PrintWriter pw = null;
@@ -41,12 +41,19 @@ public class FileService {
 			while (lineAccountNumber != null) {
 				if (lineAccountNumber.length() == 0 || verticalCount == 3)
 					verticalCount = 0;
-				
-				//Se extrae toda la línea validando la cantidad de caracteres
+
+				// Se extrae toda la línea validando la cantidad de caracteres
 				if (lineAccountNumber.length() == 27) {
 					matrizTemp[verticalCount] = lineAccountNumber.toCharArray();
 					verticalCount++;
-					
+
+					// Si llega a tres significa que ya se lleno la matriz y se envia para su
+					// procesamiento.
+					if (verticalCount == 3) {
+						String finaltAccountNumber = extractNumberData(matrizTemp);
+						// Conforme se obtiene el dato final se escribe en el documento.
+						pw.println(finaltAccountNumber);
+					}
 				}
 				lineAccountNumber = inputFile.readLine();
 			}
@@ -69,6 +76,37 @@ public class FileService {
 			}
 		}
 	}
+
+	/**
+	 * Metodo que recorre la matriz que contiene el numero de cuenta completo,
+	 * obtiene, separa y tranforma en patrones para despues validar que los datos
+	 * obtenidos sean correctos.
+	 * 
+	 * @param matrizTemp contiene el numero de cuenta
+	 * @return
+	 */
+	private String extractNumberData(char[][] matrizTemp) {
+		char[] vectorTemp = new char[9];
+		char[] vectorFinal = new char[9];
+		int countStepStep = 0;
+
+		for (int i = 0; i < 9; i++) {
+			int vectorCountT = 0;
+			for (int a = 0; a < 3; a++) {
+				int step = countStepStep;
+				for (int b = 0; b < 3; b++) {
+					vectorTemp[vectorCountT] = matrizTemp[a][step];
+					step++;
+					vectorCountT++;
+				}
+			}
+			vectorFinal[i] = patternService.getAccountNumber(vectorTemp);
+			countStepStep = (countStepStep + 3);
+		}
+
+		return null;
+	}
+
 
 
 }
